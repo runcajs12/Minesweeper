@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows;
+using System.Diagnostics.Metrics;
 
 namespace Minesweeper.Models
 {
@@ -27,16 +28,16 @@ namespace Minesweeper.Models
         public void Initialize()
         {
             int pool;
-           // if (rows == 8 || cols == 8)
-           // {
+            if (rows == 8 || cols == 8)
+            {
                 pool = 10;
-           // }
-          //  else
-           // {
-              pool = 10;
-           // }
+            }
+            else
+            {
+              pool = 40;
+            }
 
-            for (pool=10; pool > 0;)
+            for (; pool > 0;)
             {
                 Random r = new Random();
                 int x = r.Next(0, rows);
@@ -159,12 +160,102 @@ namespace Minesweeper.Models
             {
                 return;
             }
-            board[x, y].Reveal();
-            if (b.state == State.Bomb)
+            if (board[x, y].isRevealed)
             {
-                MainWindow.gameOver= true;
-                return;
+                int counter = 0;
+                if (x != 0 && y != 0)
+                {
+                    if (board[x - 1, y - 1].isFlagged)
+                    {
+                        counter++;
+                    }
+                }
+                if (x != 0)
+                {
+                    if (board[x - 1, y].isFlagged)
+                    {
+                        counter++;
+                    }
+                }
+                if (x != 0 && y != cols - 1)
+                {
+                    if (board[x - 1, y + 1].isFlagged)
+                    {
+                        counter++;
+                    }
+                }
+                if (y != 0)
+                {
+                    if (board[x, y - 1].isFlagged)
+                    {
+                        counter++;
+                    }
+                }
+                if (y != cols - 1)
+                {
+                    if (board[x, y + 1].isFlagged)
+                    {
+                        counter++;
+                    }
+                }
+                if (x != rows - 1 && y != 0)
+                {
+                    if (board[x + 1, y - 1].isFlagged)
+                    {
+                        counter++;
+                    }
+                }
+                if (x != rows - 1)
+                {
+                    if (board[x + 1, y].isFlagged)
+                    {
+                        counter++;
+                    }
+                }
+                if (x != rows - 1 && y != cols - 1)
+                {
+                    if (board[x + 1, y + 1].isFlagged)
+                    {
+                        counter++;
+                    }
+                }
+                if(board[x, y].BombsAround == counter)
+                {
+                    if (x != 0 && y != 0 && !board[x - 1, y - 1].isFlagged && !board[x - 1, y - 1].isRevealed)
+                        Reveal(board[x - 1, y - 1]);
+                    if (x != 0 && !board[x - 1, y].isFlagged && !board[x - 1, y].isRevealed)
+                        Reveal(board[x - 1, y]);
+                    if (x != 0 && y != cols - 1 && !board[x - 1, y + 1].isFlagged && !board[x - 1, y + 1].isRevealed)
+                        Reveal(board[x - 1, y + 1]);
+                    if (y != 0 && !board[x, y - 1].isFlagged &&  !board[x, y - 1].isRevealed)
+                        Reveal(board[x, y - 1]);
+                    if (y != cols - 1 && !board[x, y + 1].isFlagged && !board[x, y + 1].isRevealed)
+                        Reveal(board[x, y + 1]);
+                    if (x != rows - 1 && y != 0 && !board[x + 1, y - 1].isFlagged && y != 0 && !board[x + 1, y - 1].isRevealed)
+                        Reveal(board[x + 1, y - 1]);
+                    if (x != rows - 1 && !board[x + 1, y].isFlagged && !board[x + 1, y].isRevealed)
+                        Reveal(board[x + 1, y]);
+                    if (x != rows - 1 && y != cols - 1 && !board[x + 1, y + 1].isFlagged && !board[x + 1, y + 1].isRevealed)
+                        Reveal(board[x + 1, y + 1]);
+                }
+
             }
+            board[x, y].Reveal();
+
+            bool isgameWon = true;
+            foreach(Tile o in board)
+            {
+                if (!(o.state == State.Bomb)){
+                    if (!o.isRevealed)
+                    {
+                        isgameWon = false;
+                    }
+                }
+                
+            }
+            if(isgameWon)
+                MainWindow.gameWon = true;
+           
             if (b.state == State.Empty)
             {
                 if (x != 0 && y != 0)
@@ -234,7 +325,7 @@ namespace Minesweeper.Models
             if (b.isRevealed)
                 return;
             // MessageBox.Show("Goowno");
-           b.isFlagged=true;
+ 
             b.Flag();
         }
         public void unFlag(Tile b)
@@ -242,7 +333,7 @@ namespace Minesweeper.Models
             if (b.isRevealed)
                 return;
             // MessageBox.Show("Goowno");
-            b.isFlagged = false;
+
             b.unFlag();
         }
     }

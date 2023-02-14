@@ -26,6 +26,7 @@ namespace Minesweeper
         private Stopwatch _stopwatch;
         private DispatcherTimer _timer;
         public static bool gameOver =false;
+        public static bool gameWon = false;
         int rows = 8;
         int columns = 8;
         Board board { get; set; }
@@ -45,6 +46,7 @@ namespace Minesweeper
         {
             
             gameOver = false;
+            gameWon = false;
             gameGrid.RowDefinitions.Clear();
             gameGrid.ColumnDefinitions.Clear();
             gameGrid.Children.Clear();
@@ -99,6 +101,19 @@ namespace Minesweeper
                 _stopwatch.Stop();
                 MessageBox.Show("Wybuchła bomba!!!");
                 
+            }
+            if (gameWon)
+            {
+                foreach (UIElement child in gameGrid.Children)
+                {
+                    if (child is Button)
+                    {
+                        child.IsEnabled = false;
+                    }
+                }
+                _stopwatch.Stop();
+                MessageBox.Show("Gratulacje, wygrałeś!\n Twój czas: "+ Math.Round(_stopwatch.Elapsed.TotalSeconds, 2));
+
             }
         }
 
